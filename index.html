@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Event Attendance</title>
+    <title>Universal Attendance Kiosk</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -46,7 +46,7 @@
             border-radius: 8px; 
             font-size: 18px; 
             background-color: #f9fafb;
-            -webkit-appearance: none; /* Fixes iOS input styling bugs */
+            -webkit-appearance: none; 
         }
         input:focus { border-color: #2563eb; background-color: #fff; outline: none; }
 
@@ -110,7 +110,6 @@
 
         .clear-btn { background: transparent; color: #ef4444; border: none; cursor: pointer; font-weight: 500; }
 
-        /* Responsive design for phones / portrait tablets */
         @media (max-width: 768px) {
             body { flex-direction: column; }
             .left-panel, .right-panel { flex: none; width: 100%; padding: 25px; }
@@ -167,7 +166,6 @@
     </div>
 
 <script>
-    // Fallback in-memory array in case mobile browser blocks localStorage locally
     let memoryBackup = [];
 
     function getRecords() {
@@ -208,11 +206,17 @@
     function handleSubmit(event) {
         event.preventDefault();
 
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        
         const newEntry = {
+            date: `${year}-${month}-${day}`, // YYYY-MM-DD formatting
             name: document.getElementById('fullName').value,
             mobile: document.getElementById('mobileNumber').value,
             email: document.getElementById('email').value,
-            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
         };
 
         const records = getRecords();
@@ -234,13 +238,14 @@
             return;
         }
 
-        // Create CSV Header and Rows
-        let csvContent = "data:text/csv;charset=utf-8,Time,Name,Mobile,Email\n";
+        // Added 'Date' column to the header definition
+        let csvContent = "data:text/csv;charset=utf-8,Date,Time,Name,Mobile,Email\n";
+        
+        // Iterates through data injecting the newly captured date field
         records.forEach(r => {
-            csvContent += `"${r.time}","${r.name}","${r.mobile}","${r.email}"\n`;
+            csvContent += `"${r.date || ''}","${r.time}","${r.name}","${r.mobile}","${r.email}"\n`;
         });
 
-        // Trigger safe file download across iOS, Android, and Windows
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
