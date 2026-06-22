@@ -61,7 +61,8 @@
             font-weight: bold; 
             cursor: pointer;
         }
-        .submit-btn:active { background-color: #1d4ed8; }
+        .submit-btn:disabled { background-color: #93c5fd; cursor: not-allowed; }
+        .submit-btn:active:not(:disabled) { background-color: #1d4ed8; }
 
         .counter-card { 
             background: #eff6ff; 
@@ -135,7 +136,7 @@
                 <label for="email">Email Address</label>
                 <input type="email" id="email" placeholder="name@email.com" required>
             </div>
-            <button type="submit" class="submit-btn">Check In</button>
+            <button type="submit" id="submitBtn" class="submit-btn">Check In</button>
         </form>
 
         <div id="successToast" class="success-toast">✓ Check-in successful!</div>
@@ -165,84 +166,107 @@
         </div>
     </div>
 
-<script>
-    let memoryBackup = [];
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+        getFirestore, 
+        collection, 
+        addDoc, 
+        onSnapshot, 
+        query, 
+        orderBy, 
+        getDocs, 
+        deleteDoc, 
+        doc 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    function getRecords() {
-        try {
-            const local = localStorage.getItem('universal_attendance');
-            return local ? JSON.parse(local) : memoryBackup;
-        } catch (e) {
-            return memoryBackup;
-        }
-    }
+    // 1. Paste your Web App's Firebase configuration here
+    const firebaseConfig = {
+	  apiKey: "AIzaSyAyY5fZNPKdALIEofwQ4anOGMOKqdKmeVs",
+	  authDomain: "events-onlineform.firebaseapp.com",
+	  projectId: "events-onlineform",
+	  storageBucket: "events-onlineform.firebasestorage.app",
+	  messagingSenderId: "986891284988",
+	  appId: "1:986891284988:web:e91536179c92dd79474279"
+	};
 
-    function saveRecords(records) {
-        memoryBackup = records;
-        try {
-            localStorage.setItem('universal_attendance', JSON.stringify(records));
-        } catch (e) {
-            console.log("LocalStorage restricted on this mobile browser. Saved to temporary memory.");
-        }
-    }
+    // Initialize Firebase & Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const attendanceCollection = collection(db, "attendance");
 
-    function updateDisplay() {
-        const records = getRecords();
-        document.getElementById('totalCount').innerText = records.length;
+    // Global array to cache records for the CSV download functionality
+    let currentRecords = [];
 
+    // 2. Real-time listener: Auto-updates UI on ALL open browsers instantly
+    const q = query(attendanceCollection, orderBy("timestamp", "desc"));
+    onSnapshot(q, (snapshot) => {
+        currentRecords = [];
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = "";
+        
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            // Store the document ID in the record so we can target it for deletion if needed
+            currentRecords.push({ id: doc.id, ...data });
 
-        for (let i = records.length - 1; i >= 0; i--) {
             tbody.innerHTML += `
                 <tr>
-                    <td><span style="color:#6b7280;">${records[i].time}</span></td>
-                    <td><strong>${records[i].name}</strong></td>
+                    <td><span style="color:#6b7280;">${data.time}</span></td>
+                    <td><strong>${data.name}</strong></td>
                 </tr>
             `;
-        }
-    }
+        });
+        
+        document.getElementById('totalCount').innerText = currentRecords.length;
+    });
 
-    function handleSubmit(event) {
+    // 3. Handle Form Submission to Database
+    async function handleSubmit(event) {
         event.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
 
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
-        
+
         const newEntry = {
-            date: `${year}-${month}-${day}`, // YYYY-MM-DD formatting
+            date: `${year}-${month}-${day}`,
             name: document.getElementById('fullName').value,
             mobile: document.getElementById('mobileNumber').value,
             email: document.getElementById('email').value,
-            time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            timestamp: now.getTime() // Used for server-side chronological sorting
         };
 
-        const records = getRecords();
-        records.push(newEntry);
-        saveRecords(records);
-
-        document.getElementById('attendanceForm').reset();
-        updateDisplay();
-
-        const toast = document.getElementById('successToast');
-        toast.style.display = 'block';
-        setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        try {
+            await addDoc(attendanceCollection, newEntry);
+            
+            document.getElementById('attendanceForm').reset();
+            const toast = document.getElementById('successToast');
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 2500);
+        } catch (error) {
+            console.error("Error saving data to Firebase: ", error);
+            alert("Submission failed. Please check internet connection.");
+        } finally {
+            submitBtn.disabled = false;
+        }
     }
 
+    // 4. Download Database contents to CSV
     function downloadCSV() {
-        const records = getRecords();
-        if (records.length === 0) {
+        if (currentRecords.length === 0) {
             alert("No data to download yet!");
             return;
         }
 
-        // Added 'Date' column to the header definition
         let csvContent = "data:text/csv;charset=utf-8,Date,Time,Name,Mobile,Email\n";
         
-        // Iterates through data injecting the newly captured date field
-        records.forEach(r => {
+        // Loop through our synchronized records array (reversed back to chronological order for the spreadsheet)
+        [...currentRecords].reverse().forEach(r => {
             csvContent += `"${r.date || ''}","${r.time}","${r.name}","${r.mobile}","${r.email}"\n`;
         });
 
@@ -255,15 +279,28 @@
         document.body.removeChild(link);
     }
 
-    function clearData() {
-        if (confirm("Clear all attendance data?")) {
-            memoryBackup = [];
-            try { localStorage.removeItem('universal_attendance'); } catch(e){}
-            updateDisplay();
+    // 5. Remote Wipe Database Data
+    async function clearData() {
+        if (confirm("Wipe ALL global attendance records from the cloud? This cannot be undone.")) {
+            try {
+                const snapshot = await getDocs(attendanceCollection);
+                const deletePromises = [];
+                snapshot.forEach((documentSnapshot) => {
+                    deletePromises.push(deleteDoc(doc(db, "attendance", documentSnapshot.id)));
+                });
+                await Promise.all(deletePromises);
+                alert("Cloud database successfully cleared!");
+            } catch (error) {
+                console.error("Wipe failed: ", error);
+                alert("Permission denied or server error.");
+            }
         }
     }
 
-    window.onload = updateDisplay;
+    // Map script module functions to window object so the HTML onclick tags can access them
+    window.handleSubmit = handleSubmit;
+    window.downloadCSV = downloadCSV;
+    window.clearData = clearData;
 </script>
 </body>
 </html>
