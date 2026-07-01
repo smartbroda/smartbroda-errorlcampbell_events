@@ -39,7 +39,7 @@
         .form-group { margin-bottom: 24px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 15px; color: #374151; }
         
-        input { 
+        input, select { 
             width: 100%; 
             padding: 16px; 
             border: 2px solid #d1d5db; 
@@ -47,8 +47,18 @@
             font-size: 18px; 
             background-color: #f9fafb;
             -webkit-appearance: none; 
+            appearance: none;
         }
-        input:focus { border-color: #2563eb; background-color: #fff; outline: none; }
+        input:focus, select:focus { border-color: #2563eb; background-color: #fff; outline: none; }
+
+        /* Custom dropdown arrow styling */
+        select {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
 
         .submit-btn { 
             width: 100%; 
@@ -125,6 +135,16 @@
         
         <form id="attendanceForm" onsubmit="handleSubmit(event)">
             <div class="form-group">
+                <label for="title">Title</label>
+                <select id="title" required>
+                    <option value="" disabled selected>Select title</option>
+                    <option value="Mr">Mr</option>
+                    <option value="Mrs">Mrs</option>
+                    <option value="Ms">Ms</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
                 <label for="fullName">Full Name</label>
                 <input type="text" id="fullName" placeholder="First and Last Name" required>
             </div>
@@ -182,13 +202,13 @@
 
     // 1. Paste your Web App's Firebase configuration here
     const firebaseConfig = {
-	  apiKey: "AIzaSyAyY5fZNPKdALIEofwQ4anOGMOKqdKmeVs",
-	  authDomain: "events-onlineform.firebaseapp.com",
-	  projectId: "events-onlineform",
-	  storageBucket: "events-onlineform.firebasestorage.app",
-	  messagingSenderId: "986891284988",
-	  appId: "1:986891284988:web:e91536179c92dd79474279"
-	};
+      apiKey: "AIzaSyAyY5fZNPKdALIEofwQ4anOGMOKqdKmeVs",
+      authDomain: "events-onlineform.firebaseapp.com",
+      projectId: "events-onlineform",
+      storageBucket: "events-onlineform.firebasestorage.app",
+      messagingSenderId: "986891284988",
+      appId: "1:986891284988:web:e91536179c92dd79474279"
+    };
 
     // Initialize Firebase & Firestore
     const app = initializeApp(firebaseConfig);
@@ -232,9 +252,12 @@
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
 
+        const titleValue = document.getElementById('title').value;
+        const nameValue = document.getElementById('fullName').value;
+
         const newEntry = {
             date: `${year}-${month}-${day}`,
-            name: document.getElementById('fullName').value,
+            name: `${titleValue} ${nameValue}`,
             mobile: document.getElementById('mobileNumber').value,
             email: document.getElementById('email').value,
             time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
