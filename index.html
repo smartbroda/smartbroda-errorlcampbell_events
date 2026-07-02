@@ -49,16 +49,21 @@
             -webkit-appearance: none; 
             appearance: none;
         }
-        input:focus, select:focus { border-color: #2563eb; background-color: #fff; outline: none; }
-
-        /* Custom dropdown arrow styling */
-        select {
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            background-size: 16px;
-            padding-right: 40px;
+        /* Custom arrow styling wrapper for select box */
+        .select-wrapper {
+            position: relative;
         }
+        .select-wrapper::after {
+            content: "▼";
+            font-size: 12px;
+            color: #4b5563;
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        input:focus, select:focus { border-color: #2563eb; background-color: #fff; outline: none; }
 
         .submit-btn { 
             width: 100%; 
@@ -136,13 +141,16 @@
         <form id="attendanceForm" onsubmit="handleSubmit(event)">
             <div class="form-group">
                 <label for="title">Title</label>
-                <select id="title" required>
-                    <option value="" disabled selected>Select title</option>
-                    <option value="Mr">Mr</option>
-                    <option value="Mrs">Mrs</option>
-                    <option value="Ms">Ms</option>
-                    <option value="Other">Other</option>
-                </select>
+                <div class="select-wrapper">
+                    <select id="title" required>
+                        <option value="" disabled selected>Select title...</option>
+                        <option value="Mr">Mr</option>
+                        <option value="Mrs">Mrs</option>
+                        <option value="Miss">Miss</option>
+                        <option value="Ms">Ms</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
             </div>
             <div class="form-group">
                 <label for="fullName">Full Name</label>
@@ -230,10 +238,13 @@
             // Store the document ID in the record so we can target it for deletion if needed
             currentRecords.push({ id: doc.id, ...data });
 
+            // Render name along with their title (safeguarded if old DB documents don't have it)
+            const displayTitle = data.title ? `${data.title} ` : '';
+
             tbody.innerHTML += `
                 <tr>
                     <td><span style="color:#6b7280;">${data.time}</span></td>
-                    <td><strong>${data.name}</strong></td>
+                    <td><strong>${displayTitle}${data.name}</strong></td>
                 </tr>
             `;
         });
@@ -252,12 +263,10 @@
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
 
-        const titleValue = document.getElementById('title').value;
-        const nameValue = document.getElementById('fullName').value;
-
         const newEntry = {
             date: `${year}-${month}-${day}`,
-            name: `${titleValue} ${nameValue}`,
+            title: document.getElementById('title').value,
+            name: document.getElementById('fullName').value,
             mobile: document.getElementById('mobileNumber').value,
             email: document.getElementById('email').value,
             time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
@@ -286,11 +295,11 @@
             return;
         }
 
-        let csvContent = "data:text/csv;charset=utf-8,Date,Time,Name,Mobile,Email\n";
+        let csvContent = "data:text/csv;charset=utf-8,Date,Time,Title,Name,Mobile,Email\n";
         
         // Loop through our synchronized records array (reversed back to chronological order for the spreadsheet)
         [...currentRecords].reverse().forEach(r => {
-            csvContent += `"${r.date || ''}","${r.time}","${r.name}","${r.mobile}","${r.email}"\n`;
+            csvContent += `"${r.date || ''}","${r.time}","${r.title || ''}","${r.name}","${r.mobile}","${r.email}"\n`;
         });
 
         const encodedUri = encodeURI(csvContent);
