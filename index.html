@@ -39,7 +39,7 @@
         .form-group { margin-bottom: 24px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 15px; color: #374151; }
         
-        input, select { 
+        input[type="text"], input[type="tel"], input[type="email"], select { 
             width: 100%; 
             padding: 16px; 
             border: 2px solid #d1d5db; 
@@ -49,6 +49,7 @@
             -webkit-appearance: none; 
             appearance: none;
         }
+
         /* Custom arrow styling wrapper for select box */
         .select-wrapper {
             position: relative;
@@ -64,6 +65,29 @@
             pointer-events: none;
         }
         input:focus, select:focus { border-color: #2563eb; background-color: #fff; outline: none; }
+
+        /* Radio Options Styling */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            font-size: 16px;
+            cursor: pointer;
+            color: #4b5563;
+        }
+        .radio-label input[type="radio"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
 
         .submit-btn { 
             width: 100%; 
@@ -95,6 +119,18 @@
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #edf2f7; }
         th { background-color: #f8fafc; color: #64748b; position: sticky; top: 0; }
         
+        /* Referral Tag Badge Styling on Live UI */
+        .referral-tag {
+            display: inline-block;
+            margin-top: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #4b5563;
+            background-color: #e5e7eb;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
         .success-toast {
             display: none;
             background-color: #10b981;
@@ -164,6 +200,22 @@
                 <label for="email">Email Address</label>
                 <input type="email" id="email" placeholder="name@email.com" required>
             </div>
+            
+            <div class="form-group">
+                <label>How did you hear about today's event?</label>
+                <div class="radio-group">
+                    <label class="radio-label">
+                        <input type="radio" name="referral" value="Social Media" required> Social Media
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="referral" value="Flier"> Flier
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="referral" value="Word of mouth"> Word of mouth
+                    </label>
+                </div>
+            </div>
+
             <button type="submit" id="submitBtn" class="submit-btn">Check In</button>
         </form>
 
@@ -181,7 +233,7 @@
                 <thead>
                     <tr>
                         <th>Time</th>
-                        <th>Name</th>
+                        <th>Attendee Details</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -235,16 +287,22 @@
         
         snapshot.forEach((doc) => {
             const data = doc.data();
-            // Store the document ID in the record so we can target it for deletion if needed
             currentRecords.push({ id: doc.id, ...data });
 
-            // Render name along with their title (safeguarded if old DB documents don't have it)
             const displayTitle = data.title ? `${data.title} ` : '';
+            
+            // Build the referral visual label if it exists
+            const displayReferral = data.referral 
+                ? `<br><span class="referral-tag">Source: ${data.referral}</span>` 
+                : '';
 
             tbody.innerHTML += `
                 <tr>
-                    <td><span style="color:#6b7280;">${data.time}</span></td>
-                    <td><strong>${displayTitle}${data.name}</strong></td>
+                    <td style="vertical-align: top;"><span style="color:#6b7280;">${data.time}</span></td>
+                    <td>
+                        <strong>${displayTitle}${data.name}</strong>
+                        ${displayReferral}
+                    </td>
                 </tr>
             `;
         });
@@ -263,14 +321,17 @@
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
 
+        const referralValue = document.querySelector('input[name="referral"]:checked').value;
+
         const newEntry = {
             date: `${year}-${month}-${day}`,
             title: document.getElementById('title').value,
             name: document.getElementById('fullName').value,
             mobile: document.getElementById('mobileNumber').value,
             email: document.getElementById('email').value,
+            referral: referralValue,
             time: now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            timestamp: now.getTime() // Used for server-side chronological sorting
+            timestamp: now.getTime()
         };
 
         try {
@@ -295,11 +356,10 @@
             return;
         }
 
-        let csvContent = "data:text/csv;charset=utf-8,Date,Time,Title,Name,Mobile,Email\n";
+        let csvContent = "data:text/csv;charset=utf-8,Date,Time,Title,Name,Mobile,Email,Referral Source\n";
         
-        // Loop through our synchronized records array (reversed back to chronological order for the spreadsheet)
         [...currentRecords].reverse().forEach(r => {
-            csvContent += `"${r.date || ''}","${r.time}","${r.title || ''}","${r.name}","${r.mobile}","${r.email}"\n`;
+            csvContent += `"${r.date || ''}","${r.time}","${r.title || ''}","${r.name}","${r.mobile}","${r.email}","${r.referral || ''}"\n`;
         });
 
         const encodedUri = encodeURI(csvContent);
@@ -329,7 +389,6 @@
         }
     }
 
-    // Map script module functions to window object so the HTML onclick tags can access them
     window.handleSubmit = handleSubmit;
     window.downloadCSV = downloadCSV;
     window.clearData = clearData;
