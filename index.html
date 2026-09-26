@@ -119,7 +119,6 @@
         th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #edf2f7; }
         th { background-color: #f8fafc; color: #64748b; position: sticky; top: 0; }
         
-        /* Referral Tag Badge Styling on Live UI */
         .referral-tag {
             display: inline-block;
             margin-top: 4px;
@@ -192,19 +191,29 @@
                 <label for="fullName">Full Name</label>
                 <input type="text" id="fullName" placeholder="First and Last Name" required>
             </div>
+            
             <div class="form-group">
                 <label for="mobileNumber">Mobile Number</label>
-                <input type="tel" id="mobileNumber" placeholder="Mobile Number" required>
+                <input 
+                    type="tel" 
+                    id="mobileNumber" 
+                    placeholder="Mobile Number (10-15 digits)" 
+                    required 
+                    pattern="[0-9]{10,15}" 
+                    title="Please enter a valid mobile number between 10 and 15 digits long (numbers only)."
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                >
             </div>
+            
             <div class="form-group">
                 <label for="email">Email Address</label>
                 <input type="email" id="email" placeholder="name@email.com" required>
             </div>
+            
             <div class="form-group">
                 <label>How did you hear about today's event?</label>
-                <BR>
                 <div class="radio-group">
-                   <label class="radio-label">
+                    <label class="radio-label">
                         <input type="radio" name="referral" value="Social Media" required> Social Media
                     </label>
                     <label class="radio-label">
@@ -247,7 +256,7 @@
     </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
     import { 
         getFirestore, 
         collection, 
@@ -262,13 +271,13 @@
 
     // 1. Paste your Web App's Firebase configuration here
     const firebaseConfig = {
-      apiKey: "AIzaSyAyY5fZNPKdALIEofwQ4anOGMOKqdKmeVs",
-      authDomain: "events-onlineform.firebaseapp.com",
-      projectId: "events-onlineform",
-      storageBucket: "events-onlineform.firebasestorage.app",
-      messagingSenderId: "986891284988",
-      appId: "1:986891284988:web:e91536179c92dd79474279"
-    };
+    apiKey: "AIzaSyBICtn6iZWi0C7rJIRDaLtyu5Zvyg7hwKw",
+    authDomain: "events-online-2026-6cca5.firebaseapp.com",
+    projectId: "events-online-2026-6cca5",
+    storageBucket: "events-online-2026-6cca5.firebasestorage.app",
+    messagingSenderId: "959792759654",
+    appId: "1:959792759654:web:6d0be621a0c5b63f22fea7"
+  };
 
     // Initialize Firebase & Firestore
     const app = initializeApp(firebaseConfig);
@@ -290,8 +299,6 @@
             currentRecords.push({ id: doc.id, ...data });
 
             const displayTitle = data.title ? `${data.title} ` : '';
-            
-            // Build the referral visual label if it exists
             const displayReferral = data.referral 
                 ? `<br><span class="referral-tag">Source: ${data.referral}</span>` 
                 : '';
