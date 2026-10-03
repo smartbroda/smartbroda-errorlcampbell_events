@@ -8,44 +8,94 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --primary-glow: rgba(99, 102, 241, 0.35);
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            --panel-bg: rgba(255, 255, 255, 0.96);
+        }
+
         body { 
-            background-color: #f3f4f6; 
+            background: var(--bg-gradient);
             display: flex; 
             min-height: 100vh; 
             color: #1f2937;
+            padding: 24px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-shell {
+            display: flex;
+            width: 100%;
+            max-width: 1180px;
+            min-height: 820px;
+            background: var(--panel-bg);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            overflow: hidden;
         }
 
         .left-panel {
-            flex: 1.2;
-            background: white;
-            padding: 40px;
+            flex: 1.15;
+            padding: 48px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            border-right: 1px solid #e5e7eb;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
         }
 
         .right-panel {
             flex: 1;
-            padding: 40px;
+            padding: 48px;
             display: flex;
             flex-direction: column;
-            background-color: #f9fafb;
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
         }
 
-        h2 { font-size: 28px; margin-bottom: 8px; color: #111827; }
-        p.subtitle { color: #6b7280; font-size: 16px; margin-bottom: 30px; }
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #eef2ff;
+            color: #4f46e5;
+            border-radius: 9999px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            width: fit-content;
+        }
 
-        .form-group { margin-bottom: 24px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 15px; color: #374151; }
+        h2 { 
+            font-size: 32px; 
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px; 
+            letter-spacing: -0.02em;
+        }
+
+        p.subtitle { color: #64748b; font-size: 15px; margin-bottom: 28px; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: #334155; }
         
         input[type="text"], input[type="tel"], input[type="email"], input[type="password"], select { 
             width: 100%; 
-            padding: 16px; 
-            border: 2px solid #d1d5db; 
-            border-radius: 8px; 
-            font-size: 18px; 
-            background-color: #f9fafb;
+            padding: 14px 16px; 
+            border: 1.5px solid #cbd5e1; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            background-color: #ffffff;
+            color: #0f172a;
+            transition: all 0.2s ease;
             -webkit-appearance: none; 
             appearance: none;
         }
@@ -55,111 +105,227 @@
         }
         .select-wrapper::after {
             content: "▼";
-            font-size: 12px;
-            color: #4b5563;
+            font-size: 11px;
+            color: #6366f1;
             position: absolute;
-            right: 16px;
+            right: 18px;
             top: 50%;
             transform: translateY(-50%);
             pointer-events: none;
         }
-        input:focus, select:focus { border-color: #2563eb; background-color: #fff; outline: none; }
+        
+        input:focus, select:focus { 
+            border-color: var(--primary); 
+            background-color: #ffffff; 
+            outline: none; 
+            box-shadow: 0 0 0 4px var(--primary-glow);
+        }
 
         .radio-group {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 6px;
+        }
+        .radio-card {
+            position: relative;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-top: 8px;
-        }
-        .radio-label {
-            display: flex;
             align-items: center;
-            font-weight: 500;
-            font-size: 16px;
+            justify-content: center;
+            padding: 12px 8px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
             cursor: pointer;
-            color: #4b5563;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.2s ease;
+            text-align: center;
         }
-        .radio-label input[type="radio"] {
-            margin-right: 12px;
-            width: 20px;
-            height: 20px;
-            accent-color: #2563eb;
+        .radio-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
             cursor: pointer;
+        }
+        .radio-card:hover {
+            border-color: #cbd5e1;
+            background: #ffffff;
+        }
+        .radio-card:has(input[type="radio"]:checked) {
+            border-color: var(--primary);
+            background: #eef2ff;
+            color: #4338ca;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
         }
 
         .submit-btn { 
             width: 100%; 
             padding: 16px; 
-            background-color: #2563eb; 
+            background: var(--accent-gradient);
             color: white; 
             border: none; 
-            border-radius: 8px; 
-            font-size: 18px; 
-            font-weight: bold; 
+            border-radius: 12px; 
+            font-size: 17px; 
+            font-weight: 700; 
             cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+            margin-top: 6px;
         }
-        .submit-btn:disabled { background-color: #93c5fd; cursor: not-allowed; }
-        .submit-btn:active:not(:disabled) { background-color: #1d4ed8; }
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 25px -4px rgba(99, 102, 241, 0.5);
+        }
+        .submit-btn:active:not(:disabled) { transform: translateY(0); }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         .counter-card { 
-            background: #eff6ff; 
-            border: 1px solid #bfdbfe; 
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1); 
             padding: 24px; 
-            border-radius: 12px; 
+            border-radius: 16px; 
             text-align: center; 
-            margin-bottom: 25px; 
+            margin-bottom: 24px; 
+            box-shadow: 0 12px 24px -8px rgba(30, 27, 75, 0.4);
+            position: relative;
+            overflow: hidden;
         }
-        .counter-card h3 { font-size: 14px; color: #1e40af; text-transform: uppercase; }
-        .counter-card .number { font-size: 56px; font-weight: 800; color: #1d4ed8; }
+        .counter-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .counter-card-header {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #a5b4fc;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #22c55e;
+            animation: pulseDot 2s infinite;
+        }
+        @keyframes pulseDot {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.3); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.7; }
+        }
+        .counter-card .number { 
+            font-size: 60px; 
+            font-weight: 900; 
+            background: linear-gradient(180deg, #ffffff 0%, #c7d2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+            margin-top: 4px;
+        }
 
-        .log-container { flex: 1; overflow-y: auto; background: white; border-radius: 8px; border: 1px solid #e5e7eb; max-height: 400px; }
-        table { width: 100%; border-collapse: collapse; font-size: 15px; }
-        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #edf2f7; }
-        th { background-color: #f8fafc; color: #64748b; position: sticky; top: 0; }
+        .log-container { 
+            flex: 1; 
+            overflow-y: auto; 
+            background: #ffffff; 
+            border-radius: 16px; 
+            border: 1px solid #e2e8f0; 
+            max-height: 380px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { 
+            background: #f8fafc; 
+            color: #64748b; 
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.05em;
+            position: sticky; 
+            top: 0; 
+            z-index: 1;
+        }
+        tbody tr:hover { background-color: #faf5ff; }
         
         .referral-tag {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             margin-top: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #4b5563;
-            background-color: #e5e7eb;
-            padding: 2px 8px;
-            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 9999px;
+            letter-spacing: 0.02em;
         }
+        .tag-social { background: #fdf2f8; color: #db2777; border: 1px solid #fbcfe8; }
+        .tag-flier { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+        .tag-word { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .tag-default { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 
         .success-toast {
             display: none;
-            background-color: #10b981;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
-            padding: 16px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 12px;
             text-align: center;
             font-weight: 600;
-            margin-top: 20px;
+            margin-top: 18px;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .action-buttons {
-            margin-top: auto;
+            margin-top: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 20px;
         }
 
         .download-btn {
-            background-color: #10b981;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
             border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
-            font-weight: 600;
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
+            transition: all 0.2s ease;
         }
+        .download-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(16, 185, 129, 0.35); }
 
-        .clear-btn { background: transparent; color: #ef4444; border: none; cursor: pointer; font-weight: 500; }
+        .clear-btn { 
+            background: #fee2e2; 
+            color: #ef4444; 
+            border: 1px solid #fecaca; 
+            padding: 9px 16px;
+            border-radius: 10px;
+            cursor: pointer; 
+            font-weight: 700; 
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+        .clear-btn:hover { background: #fecaca; color: #dc2626; }
 
-        /* Modal Styles */
+        /* Unified Admin Modal */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -167,176 +333,200 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(17, 24, 39, 0.6);
-            backdrop-filter: blur(3px);
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(6px);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
         .modal-card {
-            background: white;
-            padding: 32px;
-            border-radius: 12px;
+            background: #ffffff;
+            padding: 36px;
+            border-radius: 20px;
             width: 100%;
-            max-width: 420px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            max-width: 440px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+            border: 1px solid #e2e8f0;
         }
         .modal-card h3 {
-            font-size: 20px;
-            color: #111827;
+            font-size: 22px;
+            color: #0f172a;
             margin-bottom: 6px;
+            font-weight: 800;
         }
         .modal-card p {
             font-size: 14px;
-            color: #6b7280;
-            margin-bottom: 20px;
-            line-height: 1.4;
+            color: #64748b;
+            margin-bottom: 24px;
+            line-height: 1.5;
         }
         .modal-card input {
-            font-size: 16px;
-            padding: 12px 14px;
             margin-bottom: 16px;
         }
         .modal-error {
             display: none;
             font-size: 13px;
             color: #ef4444;
-            margin-bottom: 14px;
-            font-weight: 500;
+            background: #fef2f2;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid #fecaca;
+            font-weight: 600;
         }
         .modal-actions {
             display: flex;
             justify-content: flex-end;
             gap: 12px;
-            margin-top: 8px;
+            margin-top: 12px;
         }
         .modal-btn-cancel {
-            background: #f3f4f6;
-            color: #374151;
-            border: 1px solid #d1d5db;
-            padding: 10px 16px;
-            border-radius: 6px;
+            background: #f1f5f9;
+            color: #475569;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
         }
+        .modal-btn-cancel:hover { background: #e2e8f0; }
+        
         .modal-btn-confirm {
-            background: #ef4444;
             color: white;
             border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 700;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
-        .modal-btn-confirm:disabled {
-            background: #fca5a5;
-            cursor: not-allowed;
+        .btn-wipe {
+            background: #ef4444;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
+        .btn-wipe:hover:not(:disabled) { background: #dc2626; }
+        .btn-export {
+            background: #10b981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .btn-export:hover:not(:disabled) { background: #059669; }
+        .modal-btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .left-panel, .right-panel { flex: none; width: 100%; padding: 25px; }
-            .modal-card { margin: 20px; }
+        @media (max-width: 900px) {
+            body { padding: 0; }
+            .app-shell { flex-direction: column; border-radius: 0; min-height: 100vh; }
+            .left-panel, .right-panel { padding: 32px 24px; }
+            .radio-group { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <div class="left-panel">
-        <h2>Event Check-In</h2>
-        <p class="subtitle">Please fill out your info to register.</p>
-        
-        <form id="attendanceForm" onsubmit="handleSubmit(event)">
-            <div class="form-group">
-                <label for="title">Title</label>
-                <div class="select-wrapper">
-                    <select id="title" required>
-                        <option value="" disabled selected>Select title...</option>
-                        <option value="Mr">Mr</option>
-                        <option value="Mrs">Mrs</option>
-                        <option value="Miss">Miss</option>
-                        <option value="Ms">Ms</option>
-                        <option value="Other">Other</option>
-                    </select>
+    <div class="app-shell">
+        <div class="left-panel">
+            <span class="brand-badge">✨ Registration Portal</span>
+            <h2>Event Check-In</h2>
+            <p class="subtitle">Quick and seamless guest registration.</p>
+            
+            <form id="attendanceForm" onsubmit="handleSubmit(event)">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <div class="select-wrapper">
+                        <select id="title" required>
+                            <option value="" disabled selected>Select title...</option>
+                            <option value="Mr">Mr</option>
+                            <option value="Mrs">Mrs</option>
+                            <option value="Miss">Miss</option>
+                            <option value="Ms">Ms</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label for="fullName">Full Name</label>
-                <input type="text" id="fullName" placeholder="First and Last Name" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="mobileNumber">Mobile Number</label>
-                <input 
-                    type="tel" 
-                    id="mobileNumber" 
-                    placeholder="Mobile Number (10-15 digits)" 
-                    required 
-                    pattern="[0-9]{10,15}" 
-                    title="Please enter a valid mobile number between 10 and 15 digits long (numbers only)."
-                    oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                >
-            </div>
-            
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" placeholder="name@email.com" required>
-            </div>
-            
-            <div class="form-group">
-                <label>How did you hear about today's event?</label>
-                <div class="radio-group">
-                    <label class="radio-label">
-                        <input type="radio" name="referral" value="Social Media" required> Social Media
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="referral" value="Flier"> Flier
-                    </label>
-                    <label class="radio-label">
-                        <input type="radio" name="referral" value="Word of mouth"> Word of mouth
-                    </label>
+
+                <div class="form-group">
+                    <label for="fullName">Full Name</label>
+                    <input type="text" id="fullName" placeholder="e.g. Alex Morgan" required>
                 </div>
-            </div>
+                
+                <div class="form-group">
+                    <label for="mobileNumber">Mobile Number</label>
+                    <input 
+                        type="tel" 
+                        id="mobileNumber" 
+                        placeholder="10-15 digits" 
+                        required 
+                        pattern="[0-9]{10,15}" 
+                        title="Please enter a valid mobile number between 10 and 15 digits long (numbers only)."
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="alex@company.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>How did you hear about today's event?</label>
+                    <div class="radio-group">
+                        <label class="radio-card">
+                            <input type="radio" name="referral" value="Social Media" required>
+                            <span>📱 Social Media</span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="referral" value="Flier">
+                            <span>📄 Flier</span>
+                        </label>
+                        <label class="radio-card">
+                            <input type="radio" name="referral" value="Word of mouth">
+                            <span>🗣️ Word of Mouth</span>
+                        </label>
+                    </div>
+                </div>
 
-            <button type="submit" id="submitBtn" class="submit-btn">Check In</button>
-        </form>
+                <button type="submit" id="submitBtn" class="submit-btn">Complete Check-In →</button>
+            </form>
 
-        <div id="successToast" class="success-toast">✓ Check-in successful!</div>
-    </div>
-
-    <div class="right-panel">
-        <div class="counter-card">
-            <h3>Current Attendance</h3>
-            <div class="number" id="totalCount">0</div>
+            <div id="successToast" class="success-toast">✓ Guest checked in successfully!</div>
         </div>
 
-        <div class="log-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        <th>Attendee Details</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
+        <div class="right-panel">
+            <div class="counter-card">
+                <div class="counter-card-header">
+                    <span class="live-dot"></span> Live Attendance
+                </div>
+                <div class="number" id="totalCount">0</div>
+            </div>
 
-        <div class="action-buttons">
-            <button class="download-btn" onclick="downloadCSV()">Download Excel (CSV)</button>
-            <button class="clear-btn" onclick="openAuthModal()">Wipe Data</button>
+            <div class="log-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Attendee Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="action-buttons">
+                <!-- Both buttons now invoke openAuthModal with their respective action mode -->
+                <button class="download-btn" onclick="openAuthModal('export')">Export to Excel (CSV)</button>
+                <button class="clear-btn" onclick="openAuthModal('wipe')">Clear Records</button>
+            </div>
         </div>
     </div>
 
     <!-- Admin Authentication Modal -->
     <div id="authModal" class="modal-overlay">
         <div class="modal-card">
-            <h3>Admin Verification</h3>
-            <p>Enter your admin credentials to authorize wiping all cloud records.</p>
+            <h3 id="modalTitle">Admin Authorization</h3>
+            <p id="modalDescription">Enter your administrator credentials to proceed.</p>
             
             <div class="modal-error" id="modalError"></div>
 
-            <label for="adminUsername">Username / Email</label>
+            <label for="adminUsername">Admin Username / Email</label>
             <input type="email" id="adminUsername" placeholder="admin@domain.com" autocomplete="username">
 
             <label for="adminPassword">Password</label>
@@ -344,7 +534,7 @@
 
             <div class="modal-actions">
                 <button type="button" class="modal-btn-cancel" onclick="closeAuthModal()">Cancel</button>
-                <button type="button" class="modal-btn-confirm" id="confirmWipeBtn" onclick="confirmWipe()">Authenticate &amp; Wipe</button>
+                <button type="button" class="modal-btn-confirm btn-wipe" id="confirmActionBtn" onclick="executeAdminAction()">Authorize</button>
             </div>
         </div>
     </div>
@@ -368,7 +558,6 @@
         doc 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Firebase configuration[cite: 3]
     const firebaseConfig = {
       apiKey: "AIzaSyDE7bIpeyh5OMUrZ8YsP0hF3Cyg_OZ_bqI",
       authDomain: "events-online-ecc.firebaseapp.com",
@@ -384,8 +573,16 @@
     const attendanceCollection = collection(db, "attendance");
 
     let currentRecords = [];
+    let pendingAction = null; // Stores 'export' or 'wipe'
 
-    // Real-time listener: Auto-updates UI on all open browsers[cite: 3]
+    function getReferralClass(referral) {
+        if (!referral) return 'tag-default';
+        if (referral.toLowerCase().includes('social')) return 'tag-social';
+        if (referral.toLowerCase().includes('flier')) return 'tag-flier';
+        if (referral.toLowerCase().includes('word')) return 'tag-word';
+        return 'tag-default';
+    }
+
     const q = query(attendanceCollection, orderBy("timestamp", "desc"));
     onSnapshot(q, (snapshot) => {
         currentRecords = [];
@@ -397,15 +594,16 @@
             currentRecords.push({ id: docSnap.id, ...data });
 
             const displayTitle = data.title ? `${data.title} ` : '';
+            const referralClass = getReferralClass(data.referral);
             const displayReferral = data.referral 
-                ? `<br><span class="referral-tag">Source: ${data.referral}</span>` 
+                ? `<br><span class="referral-tag ${referralClass}">● ${data.referral}</span>` 
                 : '';
 
             tbody.innerHTML += `
                 <tr>
-                    <td style="vertical-align: top;"><span style="color:#6b7280;">${data.time}</span></td>
+                    <td style="vertical-align: top;"><span style="color:#64748b; font-weight: 500;">${data.time}</span></td>
                     <td>
-                        <strong>${displayTitle}${data.name}</strong>
+                        <strong style="color: #0f172a;">${displayTitle}${data.name}</strong>
                         ${displayReferral}
                     </td>
                 </tr>
@@ -417,7 +615,6 @@
         console.error("Firestore Listener Error:", error);
     });
 
-    // Handle Form Submission to Database[cite: 3]
     async function handleSubmit(event) {
         event.preventDefault();
         const submitBtn = document.getElementById('submitBtn');
@@ -457,10 +654,92 @@
         }
     }
 
-    // Download Database contents to CSV[cite: 3]
-    function downloadCSV() {
+    // Modal Control Functions (Configures copy & styling based on action)
+    function openAuthModal(action) {
+        pendingAction = action;
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDesc = document.getElementById('modalDescription');
+        const confirmBtn = document.getElementById('confirmActionBtn');
+
+        document.getElementById('modalError').style.display = 'none';
+        document.getElementById('modalError').innerText = '';
+        document.getElementById('adminUsername').value = '';
+        document.getElementById('adminPassword').value = '';
+
+        if (action === 'export') {
+            modalTitle.innerText = 'Export Authorization';
+            modalDesc.innerText = 'Please authenticate as an administrator to download the full guest list CSV.';
+            confirmBtn.innerText = 'Authenticate & Download';
+            confirmBtn.className = 'modal-btn-confirm btn-export';
+        } else {
+            modalTitle.innerText = 'Wipe Database Confirmation';
+            modalDesc.innerText = 'This will permanently delete all records. Please authenticate to confirm.';
+            confirmBtn.innerText = 'Authenticate & Wipe';
+            confirmBtn.className = 'modal-btn-confirm btn-wipe';
+        }
+
+        document.getElementById('authModal').style.display = 'flex';
+        document.getElementById('adminUsername').focus();
+    }
+
+    function closeAuthModal() {
+        document.getElementById('authModal').style.display = 'none';
+        pendingAction = null;
+    }
+
+    // Executes the requested action only after successful Firebase auth
+    async function executeAdminAction() {
+        const username = document.getElementById('adminUsername').value.trim();
+        const password = document.getElementById('adminPassword').value;
+        const errorEl = document.getElementById('modalError');
+        const confirmBtn = document.getElementById('confirmActionBtn');
+
+        if (!username || !password) {
+            errorEl.innerText = 'Please enter both username and password.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        confirmBtn.disabled = true;
+        const originalText = confirmBtn.innerText;
+        confirmBtn.innerText = 'Verifying...';
+        errorEl.style.display = 'none';
+
+        try {
+            await signInWithEmailAndPassword(auth, username, password);
+
+            if (pendingAction === 'export') {
+                runCSVDownload();
+                closeAuthModal();
+            } else if (pendingAction === 'wipe') {
+                const snapshot = await getDocs(attendanceCollection);
+                const deletePromises = [];
+                snapshot.forEach((documentSnapshot) => {
+                    deletePromises.push(deleteDoc(doc(db, "attendance", documentSnapshot.id)));
+                });
+                await Promise.all(deletePromises);
+                closeAuthModal();
+                alert('Cloud database successfully cleared!');
+            }
+        } catch (error) {
+            console.error('Admin action failed:', error);
+            errorEl.style.display = 'block';
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                errorEl.innerText = 'Authentication failed: Incorrect username or password.';
+            } else {
+                errorEl.innerText = error.message || 'Permission denied.';
+            }
+        } finally {
+            confirmBtn.disabled = false;
+            confirmBtn.innerText = originalText;
+            await signOut(auth);
+        }
+    }
+
+    // Internal CSV download runner
+    function runCSVDownload() {
         if (currentRecords.length === 0) {
-            alert("No data to download yet!");
+            alert("No records to download yet!");
             return;
         }
 
@@ -479,77 +758,19 @@
         document.body.removeChild(link);
     }
 
-    // Modal Control Functions
-    function openAuthModal() {
-        document.getElementById('modalError').style.display = 'none';
-        document.getElementById('modalError').innerText = '';
-        document.getElementById('adminUsername').value = '';
-        document.getElementById('adminPassword').value = '';
-        document.getElementById('authModal').style.display = 'flex';
-        document.getElementById('adminUsername').focus();
-    }
-
-    function closeAuthModal() {
-        document.getElementById('authModal').style.display = 'none';
-    }
-
-    async function confirmWipe() {
-        const username = document.getElementById('adminUsername').value.trim();
-        const password = document.getElementById('adminPassword').value;
-        const errorEl = document.getElementById('modalError');
-        const confirmBtn = document.getElementById('confirmWipeBtn');
-
-        if (!username || !password) {
-            errorEl.innerText = 'Please enter both username and password.';
-            errorEl.style.display = 'block';
-            return;
-        }
-
-        confirmBtn.disabled = true;
-        confirmBtn.innerText = 'Wiping...';
-        errorEl.style.display = 'none';
-
-        try {
-            await signInWithEmailAndPassword(auth, username, password);
-
-            const snapshot = await getDocs(attendanceCollection);
-            const deletePromises = [];
-            snapshot.forEach((documentSnapshot) => {
-                deletePromises.push(deleteDoc(doc(db, "attendance", documentSnapshot.id)));
-            });
-            await Promise.all(deletePromises);
-
-            closeAuthModal();
-            alert('Cloud database successfully cleared!');
-        } catch (error) {
-            console.error('Wipe failed:', error);
-            errorEl.style.display = 'block';
-            if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-                errorEl.innerText = 'Authentication failed: Incorrect username or password.';
-            } else {
-                errorEl.innerText = error.message || 'Permission denied. Could not wipe data.';
-            }
-        } finally {
-            confirmBtn.disabled = false;
-            confirmBtn.innerText = 'Authenticate & Wipe';
-            await signOut(auth);
-        }
-    }
-
-    // Allow Enter key to submit inside the modal
+    // Enter key shortcuts inside the modal
     ['adminUsername', 'adminPassword'].forEach((id) => {
         document.getElementById(id).addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
-                confirmWipe();
+                executeAdminAction();
             }
         });
     });
 
     window.handleSubmit = handleSubmit;
-    window.downloadCSV = downloadCSV;
     window.openAuthModal = openAuthModal;
     window.closeAuthModal = closeAuthModal;
-    window.confirmWipe = confirmWipe;
+    window.executeAdminAction = executeAdminAction;
 </script>
 </body>
 </html>
